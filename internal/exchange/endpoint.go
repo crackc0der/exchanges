@@ -2,33 +2,36 @@ package exchange
 
 import (
 	"encoding/json"
-	"log/slog"
 	"net/http"
+
+	"github.com/crackc0der/exchanges/config"
+	"github.com/crackc0der/exchanges/logger"
 )
 
 type ExchangeServiceInterface interface {
 	ServiceExchange(exc *Exchange) *ExchangeResult
 }
 
-func NewEndpoint(log *slog.Logger, service ExchangeServiceInterface) *Endpoint {
-	return &Endpoint{log: log, service: service}
+func NewEndpoint(log *logger.Logger, service ExchangeServiceInterface, config *config.Config) *Endpoint {
+	return &Endpoint{logger: log, service: service, config: config}
 }
 
 type Endpoint struct {
 	service ExchangeServiceInterface
-	log     *slog.Logger
+	logger  *logger.Logger
+	config  *config.Config
 }
 
 func (e *Endpoint) EndpointExchange(writer http.ResponseWriter, request *http.Request) {
 	var exc Exchange
 
 	if err := json.NewDecoder(request.Body).Decode(&exc); err != nil {
-		e.log.Error("error in method Endpoint.AddUser:" + err.Error())
+		e.logger.Log(e.config.LogLevel, "error in method Endpoint.AddUser:"+err.Error())
 	}
 
 	result := e.service.ServiceExchange(&exc)
 
 	if err := json.NewEncoder(writer).Encode(&result); err != nil {
-		e.log.Error(err.Error())
+		e.logger.Log(e.config.LogLevel, "error in method Endpoint.AddUser:"+err.Error())
 	}
 }
