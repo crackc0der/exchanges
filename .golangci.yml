@@ -1,0 +1,12 @@
+linters:
+  errcheck:
+    exclude-functions:
+      - someFunctionToExclude
+  enable-all: true
+  disable:
+    - execinquery
+    - gomnd
+    - revive
+    - depguard
+    - testpackage
+    
